@@ -1,0 +1,28 @@
+m255
+K3
+13
+cModel Technology
+Z0 d/home/staylor/spring14/video/stripes/simulation/modelsim
+vstripes
+DXx6 sv_std 3 std 0 22 F[19LRNL:5;XmIFh[XOPn1
+!i10b 1
+!s100 UK10hQ@SlOS_<:V6=8R[A2
+I^[J3z7kEoHmj`9VRh3c:92
+VZ6FD<l8B5_ER7S0J<ZR;32
+!s105 stripes_svo_unit
+S1
+Z1 d/home/staylor/spring14/video/stripes/simulation/modelsim
+w1387766431
+8stripes.svo
+Fstripes.svo
+L0 31
+Z2 OV;L;10.1b;51
+r1
+!s85 0
+31
+!s108 1387767068.644670
+!s107 stripes.svo|
+!s90 -reportprogress|300|-sv|-work|work|+incdir+.|stripes.svo|
+!s101 -O0
+o-sv -work work -O0
+!s92 -sv -work work +incdir+. -O0

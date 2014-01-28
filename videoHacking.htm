@@ -1,0 +1,119 @@
+<html>
+<head>
+<title>
+Video output from the DE2 board
+</title>
+</head>
+<body>
+<h2>
+Video output from the DE2 board
+</h2>
+I'd like us to do some video hacks for the DE2 board.  
+
+<p><a href="DE2_UserManual_1.6.pdf">Here's the DE2 user manual</a>
+<p><a href="http://en.wikipedia.org/wiki/Front_porch#Structure_of_a_video_signal">Wikipedia's explanation of video isn't bad</a>
+ although for a VGA monitor, we put the colors on different pins instead of
+the color-burst scheme used for analog television.  The rest of what I know 
+about video signals comes from the <a href="http://en.wikipedia.org/wiki/Video_Graphics_Array">Wikipedia article on VGA</a>.
+
+<p>
+I've worked up the <a href ="stripes.sv">following short example,</a> which is written in 
+System Verilog.  Its job is to time the outputs appropriately to 
+produce VGA output on the video connector of the DE-2 board.
+<blockquote>
+<xmp>
+module stripes(input logic CLOCK_50 , 
+				
+				output logic [9:0]VGA_R,
+				output logic [9:0]VGA_G,
+				output logic [9:0]VGA_B,
+				output logic VGA_CLK , VGA_BLANK ,VGA_HS ,VGA_VS  );
+				
+				logic video_on, video_on_v, video_on_h;
+				logic [9:0]h_count, v_count;
+
+				assign video_on = video_on_v & video_on_h;
+				assign VGA_CLK = CLOCK_50;
+				assign VGA_BLANK = video_on; //  active low
+					
+				// heavily based on VHDL, p197 of Rapid Prototyping of Digital Systems
+				always @(posedge(CLOCK_50))	
+				 begin
+					// pixel count and horizontal sync
+					if (h_count == 815) h_count = 10'b0; else h_count = h_count + 1;
+					if (h_count < 756 & h_count > 660) VGA_HS = 0; else VGA_HS = 1;  // active low
+					
+					// line count and vertical sync
+					if (v_count > 523 & h_count > 699) v_count = 10'b0;
+					else if (h_count == 699) v_count = v_count + 1;
+					if (v_count <495 & v_count > 492) VGA_VS = 0; else VGA_VS = 1;
+					
+					// generate pixels
+					if (h_count < 640) video_on_h = 1; else video_on_h = 0;
+					if (v_count < 480) video_on_v = 1; else video_on_v = 0;
+					
+					if (video_on) case /*({h_count[4:3]})// ({v_count[6:5]})//
+								*/({h_count[6],v_count[6]})
+					0:  begin 
+							VGA_R = 10'b0;
+							VGA_G = 10'b0;
+							VGA_B =  {v_count[5:0] & 6'b111111,4'b0};
+						 end
+					1:	 begin
+							VGA_R = 10'b1111111111;
+							VGA_G = 10'b0;
+							VGA_B = 10'b0;
+						 end
+					2:	 begin
+							VGA_R = 10'b0;
+							VGA_G = 10'b1111111111;
+							VGA_B = 10'b0;
+						 end
+					3:	 begin
+							VGA_R = 10'b1111111111;
+							VGA_G = 10'b1111111111;
+							VGA_B = 10'b1111111111;
+						 end
+					
+					endcase
+					else begin 
+							VGA_R = 10'b0;
+							VGA_G = 10'b0;
+							VGA_B = 10'b0;
+						 end		
+				 end
+endmodule
+</xmp>
+</blockquote>
+			
+<p>
+In order to get this to work in quartus, you'll need the <a href="DE2_pin_assignments.csv">DE2 pin assignments file</a>.
+<p>
+My hope is that working together we can come up with a series of 
+video applications which do something slightly more useful.
+
+<p>
+For example, it would  be neat to produce the output:
+<blockquote>
+<xmp>
+FSU
+</xmp>
+</blockquote>
+or even better
+<blockquote>
+<xmp>
+Fitchburg State
+</xmp>
+</blockquote>
+
+A rather more useful idea would include a font, so that you could output
+arbitrary text easily; or to get really fancy, a module interface that would
+let you come up with text to output without re-coding the video stuff 
+every time.
+
+<p>
+I'd like to do a PONG game.  The original Atari PONG game was done in 
+hardware with a couple of counters, and we should be able to simularly 
+code it in verilog fairly briefly.
+</body>
+</html>
