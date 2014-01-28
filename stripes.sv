@@ -7,16 +7,22 @@ module stripes(input logic CLOCK_50 ,
 				
 				logic video_on, video_on_v, video_on_h;
 				logic [9:0]h_count, v_count;
+				logic CLOCK_25;
+				
+				always @(posedge(CLOCK_50))	begin
+					CLOCK_25 = ~CLOCK_25;
+				end
+				
 
 				assign video_on = video_on_v & video_on_h;
-				assign VGA_CLK = CLOCK_50;
+				assign VGA_CLK = CLOCK_25;
 				assign VGA_BLANK = video_on; //  active low
 					
 				// heavily based on VHDL, p197 of Rapid Prototyping of Digital Systems
-				always @(posedge(CLOCK_50))	
+				always @(posedge(CLOCK_25))	
 				 begin
 					// pixel count and horizontal sync
-					if (h_count == 815) h_count = 10'b0; else h_count = h_count + 1;
+					if (h_count == 799) h_count = 10'b0; else h_count = h_count + 1;
 					if (h_count < 756 & h_count > 660) VGA_HS = 0; else VGA_HS = 1;  // active low
 					
 					// line count and vertical sync
